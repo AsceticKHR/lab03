@@ -14,7 +14,7 @@
 
 <body>
     <h1>Hello, world!
-        <form class="container my-4" method="POST" action="/bookings">
+        <form onsubmit="handleSubmit(event)">
             <div class="row mb-3">
                 <label for="inputEmail3" class="col-sm-2 col-form-label">Email</label>
 
@@ -24,10 +24,10 @@
                 </div>
             </div>
             <div class="row mb-3">
-                <label for="input Number of tickets" class="col-sm-2 col-form-label">Number of tickets</label>
+                <label for="inputPassword3" class="col-sm-2 col-form-label">Number of tickets</label>
                 <div class="col-sm-10">
-                    <input type="number" class="form-control" id="inputNumOfTickets" style="height:75px"
-                        name="numTickets" min=1 max=4>
+                    <input type="number" class="form-control" id="inputPassword3" style="height:75px" name="numTickets"
+                        min=1 max=4>
                 </div>
             </div>
 
@@ -93,7 +93,7 @@
 
             <button type="submit" class="btn btn-primary">Buy Tickets</button>
 
-
+            <button type="button" class="btn btn-danger" onclick="handleDelete()">Delete</button>
 
 
 
@@ -151,27 +151,97 @@
             }
         }
 
-// A function to fetch a booking
-async function getBooking(id) {
-    // fetch the booking
-    const response = await fetch(`/api/bookings/${id}`);
-    // convert the response to json
-    const json = await response.json();
-    // return the json
-    return json;
-}
-// A function to render a booking
-function renderBooking(booking) {
-    document.querySelector("#inputEmail3").value = booking.email;
-    document.querySelector("#inputPassword3").value = booking.numTickets;
-    document.querySelector(`option[value='${booking.team}']`).selected = true;
-    teamSelected(booking.team)
-    document.querySelector(`option[value='${booking.superhero}']`).selected = true;
-    document.querySelector(`input[value='${booking.payment}']`).checked = true;
-    document.querySelector("#gridCheck1").checked = booking.terms;
-}
-   
+        // A function to fetch a booking
+        async function getBooking(id) {
+            // fetch the booking
+            const response = await fetch(`/api/bookings/${id}`);
+            // convert the response to json
+            const json = await response.json();
+            // return the json
+            return json;
+        }
 
+        // A function to render a booking
+        function renderBooking(booking) {
+            document.querySelector("#inputEmail3").value = booking.email;
+            document.querySelector("#inputPassword3").value = booking.numTickets;
+            document.querySelector(`option[value='${booking.team}']`).selected = true;
+            teamSelected(booking.team)
+            document.querySelector(`option[value='${booking.superhero}']`).selected = true;
+            document.querySelector(`input[value='${booking.payment}']`).checked = true;
+            document.querySelector("#gridCheck1").checked = booking.terms;
+        }
+
+        // A function to render the booking
+        async function render() {
+            // get the id from the url
+            const urlParams = new URLSearchParams(window.location.search);
+            let id = urlParams.get("id")
+            // get the booking
+            const booking = await getBooking(id);
+            // render the booking
+            renderBooking(booking);
+        }
+        render()
+
+        // A function to update a booking with www-form-urlencoded data
+        async function updateBooking(id, booking) {
+
+            const response = await fetch(`/api/bookings/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams(booking)
+            });
+            // convert the response to json
+            const json = await response.json();
+            // return the json
+            return json;
+        }
+
+
+        // A function to handle the form submission and display the response
+        async function handleSubmit(event) {
+            // prevent the default behaviour
+            event.preventDefault();
+            // get the id from the url
+            const urlParams = new URLSearchParams(window.location.search);
+            let id = urlParams.get("id")
+            // get the form data
+            const formData = new FormData(event.target);
+            // update the booking
+            const updatedBooking = await updateBooking(id, formData);
+            // display the response
+            alert(JSON.stringify(updatedBooking));
+        }
+        // A function to delete a booking
+        async function deleteBooking(id) {
+            // fetch the booking
+            const response = await fetch(`/api/bookings/${id}`, {
+                method: 'DELETE'
+            });
+            // convert the response to json
+            const json = await response.json();
+            // return the json
+            return json;
+        }
+
+        // A function to display a confirm box for delete, display the response and redirect to the bookings page
+        async function handleDelete() {
+            // get the id from the url
+            const urlParams = new URLSearchParams(window.location.search);
+            let id = urlParams.get("id")
+            // display a confirm box
+            if (confirm(`Are you sure you want to delete booking ${id}?`)) {
+                // delete the booking
+                const deletedBooking = await deleteBooking(id);
+                // display the response
+                alert(JSON.stringify(deletedBooking));
+                // redirect to the bookings page
+                window.location.href = "/booking.html";
+            }
+        }
 
     </script>
 
